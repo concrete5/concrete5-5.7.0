@@ -253,55 +253,52 @@ class Controller extends BlockController implements UsesFeatureInterface
 
     public function action_preview_pane()
     {
-        $bt = BlockType::getByHandle('page_list');
+        $bt = BlockType::getByHandle($this->btHandle);
         $controller = $bt->getController();
 
-        // @TODO - clean up this old code.
+        $this->request->query->set('num', ($this->request->get('num') > 0) ? 20 : 0);
+        $this->request->query->set('cThis', ($this->request->get('cParentID') == $this->request->get('current_page')) ? '1' : '0');
+        $this->request->query->set('cParentID', ($this->request->get('cParentID') === 'OTHER') ? $this->request->get('cParentIDValue') : $this->request->get('cParentID'));
 
-        $_REQUEST['num'] = ($_REQUEST['num'] > 0) ? $_REQUEST['num'] : 0;
-        $_REQUEST['cThis'] = ($_REQUEST['cParentID'] == $_REQUEST['current_page']) ? '1' : '0';
-        $_REQUEST['cParentID'] = ($_REQUEST['cParentID'] == 'OTHER') ? $_REQUEST['cParentIDValue'] : $_REQUEST['cParentID'];
-
-        if ($_REQUEST['filterDateOption'] != 'between') {
-            $_REQUEST['filterDateStart'] = null;
-            $_REQUEST['filterDateEnd'] = null;
+        if ($this->request->get('filterDateOption') !== 'between') {
+            $this->request->query->set('filterDateStart', null);
+            $this->request->query->set('filterDateEnd', null);
         }
 
-        if ($_REQUEST['filterDateOption'] == 'past') {
-            $_REQUEST['filterDateDays'] = $_REQUEST['filterDatePast'];
-        } elseif ($_REQUEST['filterDateOption'] == 'future') {
-            $_REQUEST['filterDateDays'] = $_REQUEST['filterDateFuture'];
+        if ($this->request->get('filterDateOption') === 'past') {
+            $this->request->query->set('filterDateDays', $this->request->get('filterDatePast'));
+        } elseif ($this->request->get('filterDateOption') === 'future') {
+            $this->request->query->set('filterDateDays', $this->request->get('filterDateFuture'));
         } else {
-            $_REQUEST['filterDateDays'] = null;
+            $this->request->query->set('filterDateDays', null);
         }
 
-        $controller->num = $_REQUEST['num'];
-        $controller->cParentID = $_REQUEST['cParentID'];
-        $controller->cThis = $_REQUEST['cThis'];
-        $controller->orderBy = $_REQUEST['orderBy'];
-        $controller->ptID = $_REQUEST['ptID'];
-        $controller->rss = $_REQUEST['rss'];
-        $controller->displayFeaturedOnly = $_REQUEST['displayFeaturedOnly'] ?? false;
-        $controller->displayAliases = $_REQUEST['displayAliases'] ?? false;
-        $controller->paginate = $_REQUEST['paginate'] ?? false;
-        $controller->excludeCanonicalPaging = $_REQUEST['excludeCanonicalPaging'] ?? false;
-        $controller->enableExternalFiltering = $_REQUEST['enableExternalFiltering'] ?? false;
-        $controller->excludeCurrentPage = $_REQUEST['excludeCurrentPage'] ?? false;
-        $controller->filterByRelated = $_REQUEST['filterByRelated'] ?? false;
-        $controller->relatedTopicAttributeKeyHandle = $_REQUEST['relatedTopicAttributeKeyHandle'];
-        $controller->filterByCustomTopic = ($_REQUEST['topicFilter'] == 'custom') ? '1' : '0';
-        $controller->customTopicAttributeKeyHandle = $_REQUEST['customTopicAttributeKeyHandle'];
-        $controller->customTopicTreeNodeID = $_REQUEST['customTopicTreeNodeID'];
-        $controller->includeAllDescendents = $_REQUEST['includeAllDescendents'] ?? false;
-        $controller->includeDate = $_REQUEST['includeDate'] ?? false;
-        $controller->displayThumbnail = $_REQUEST['displayThumbnail'] ?? false;
-        $controller->includeDescription = $_REQUEST['includeDescription'] ?? false;
-        $controller->useButtonForLink = $_REQUEST['useButtonForLink'] ?? false;
-        $controller->filterDateOption = $_REQUEST['filterDateOption'];
-        $controller->filterDateStart = $_REQUEST['filterDateStart'];
-        $controller->filterDateEnd = $_REQUEST['filterDateEnd'];
-        $controller->filterDateDays = $_REQUEST['filterDateDays'];
-        $controller->noResultsMessage = $_REQUEST['noResultsMessage'];
+        $controller->num = $this->request->get('num');
+        $controller->cParentID = $this->request->get('cParentID');
+        $controller->cThis = $this->request->get('cThis');
+        $controller->orderBy = $this->request->get('orderBy');
+        $controller->ptID = $this->request->get('ptID');
+        $controller->rss = $this->request->get('rss');
+        $controller->displayFeaturedOnly = $this->request->get('displayFeaturedOnly') ?? false;
+        $controller->displayAliases = $this->request->get('displayAliases') ?? false;
+        $controller->paginate = $this->request->get('paginate') ?? false;
+        $controller->enableExternalFiltering = $this->request->get('enableExternalFiltering') ?? false;
+        $controller->excludeCurrentPage = $this->request->get('excludeCurrentPage') ?? false;
+        $controller->filterByRelated = $this->request->get('filterByRelated') ?? false;
+        $controller->relatedTopicAttributeKeyHandle = $this->request->get('relatedTopicAttributeKeyHandle');
+        $controller->filterByCustomTopic = ($this->request->get('topicFilter') == 'custom') ? '1' : '0';
+        $controller->customTopicAttributeKeyHandle = $this->request->get('customTopicAttributeKeyHandle');
+        $controller->customTopicTreeNodeID = $this->request->get('customTopicTreeNodeID');
+        $controller->includeAllDescendents = $this->request->get('includeAllDescendents') ?? false;
+        $controller->includeDate = $this->request->get('includeDate') ?? false;
+        $controller->displayThumbnail = $this->request->get('displayThumbnail') ?? false;
+        $controller->includeDescription = $this->request->get('includeDescription') ?? false;
+        $controller->useButtonForLink = $this->request->get('useButtonForLink') ?? false;
+        $controller->filterDateOption = $this->request->get('filterDateOption');
+        $controller->filterDateStart = $this->request->get('filterDateStart');
+        $controller->filterDateEnd = $this->request->get('filterDateEnd');
+        $controller->filterDateDays = $this->request->get('filterDateDays');
+        $controller->noResultsMessage = $this->request->get('noResultsMessage');
         $controller->set('includeEntryText', true);
         $controller->set('includeName', true);
         $controller->set('displayThumbnail', $controller->displayThumbnail);
