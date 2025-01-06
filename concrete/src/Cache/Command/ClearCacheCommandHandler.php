@@ -10,6 +10,7 @@ use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Database\DatabaseManager;
 use Concrete\Core\Foundation\Environment;
 use Concrete\Core\Localization\Localization;
+use Concrete\Core\Page\Theme\Theme;
 use Exception;
 use FilesystemIterator;
 use Illuminate\Filesystem\Filesystem;
@@ -93,6 +94,9 @@ class ClearCacheCommandHandler
         // clear block type cache
         $this->clearBlockTypeCache();
 
+        // Rescan the active theme(s) to ensure that, if they have a custom pagetheme class, that is registered properly
+        $this->rescanThemeCustomClasses();
+
         // Clear precompiled script bytecode caches
         $this->clearOpcodeCache();
 
@@ -142,6 +146,14 @@ class ClearCacheCommandHandler
             if ($cache instanceof FlushableInterface) {
                 yield $key => $cache;
             }
+        }
+    }
+
+    protected function rescanThemeCustomClasses()
+    {
+        $themes = Theme::getList();
+        foreach ($themes as $theme) {
+            $theme->updateThemeCustomClass();
         }
     }
 

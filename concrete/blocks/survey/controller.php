@@ -168,7 +168,7 @@ class Controller extends BlockController implements UsesFeatureInterface
                 $ip = $iph->getRequestIP();
                 $ip = ($ip === false) ? ('') : ($ip->getIp($ip::FORMAT_IP_STRING));
                 $v = [
-                    $_REQUEST['optionID'],
+                    $this->request->get('optionID'),
                     $this->bID,
                     $duID,
                     $ip,

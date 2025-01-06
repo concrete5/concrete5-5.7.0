@@ -5,6 +5,7 @@ use Concrete\Core\Attribute\Key\Key;
 defined('C5_EXECUTE') or die('Access denied.');
 
 $form = Loader::helper('form');
+$user = $user ?? app('user');
 
 if (isset($authType) && $authType) {
     $active = $authType;

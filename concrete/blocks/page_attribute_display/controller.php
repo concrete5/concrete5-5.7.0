@@ -9,6 +9,8 @@ use Concrete\Core\Feature\Features;
 use Concrete\Core\Feature\UsesFeatureInterface;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Localization\Service\Date;
+use Concrete\Core\User\User;
+use Concrete\Core\User\UserInfo;
 
 defined('C5_EXECUTE') or die('Access Denied.');
 
@@ -154,6 +156,20 @@ class Controller extends BlockController implements UsesFeatureInterface
             case "rpv_pageDatePublic":
                 $content = $c->getCollectionDatePublic();
                 break;
+            case 'rpv_pageUserName':
+                $cu_id = $c->getCollectionUserID();
+                $cu = User::getByUserID($cu_id);
+                if(is_object($cu)) {
+                    $content = $cu->getUserName();
+                }
+                break;
+            case 'rpv_pageUserEmail':
+                $cu_id = $c->getCollectionUserID();
+                $cu = User::getByUserID($cu_id);
+                if(is_object($cu)){
+                    $content = $cu->getUserInfoObject()->getUserEmail();
+                }
+                break;
             default:
                 $content = $c->getAttribute($this->attributeHandle);
                 if ($content instanceof \DateTime) {
@@ -271,6 +287,8 @@ class Controller extends BlockController implements UsesFeatureInterface
             'rpv_pageDateCreated' => t('Page Date Created'),
             'rpv_pageDatePublic' => t('Page Date Published'),
             'rpv_pageDateLastModified' => t('Page Date Modified'),
+            'rpv_pageUserName' => t('Created by User Name'),
+            'rpv_pageUserEmail' => t('Created by User Email'),
         ];
     }
 

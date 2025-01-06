@@ -195,7 +195,7 @@ class UsageTracker implements TrackerInterface
                     $file = $file->getFileID();
                 } elseif (uuid_is_valid($file)) {
                     $fo = \Concrete\Core\File\File::getByUUID($file);
-                    $file = $fo->getFileID();
+                    $file = $fo ? $fo->getFileID() : null;
                 }
 
                 if ($file && $persist($collection, $trackable, (int) $file)) {

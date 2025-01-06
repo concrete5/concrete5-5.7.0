@@ -63,23 +63,28 @@ class DashboardStacksBreadcrumbFactory implements ApplicationAwareInterface
             array_shift($stacks); // Remove the top "Stacks" page.
             $stacks[] = $stackOrFolder;
             foreach($stacks as $stack) {
-                $stackItem = new Item(
+                $breadcrumb->add(new Item(
                     $this->app->make('url')->to(
                         '/dashboard/blocks/stacks', 'view_details', $stack->getCollectionID()
                     ),
                     $stack->getCollectionName()
-                );
-                $breadcrumb->add($stackItem);
+                ));
             }
-            if ($stackOrFolder instanceof Stack) {
-                if ($locale !== '') {
-                    $stackItem = new Item(
+            if ($stackOrFolder instanceof Stack && !empty($sections)) {
+                if ($locale) {
+                    $section = $sections[$locale];
+                    $multilingualMenuItem = new Item(
                         '',
-                        $locale
+                        Flag::getSectionFlagIcon($section) . ' ' . h($section->getLanguageText()) . ' <span class="text-muted">(' . h($locale) . ')</span>',
                     );
-                    $breadcrumb->add($stackItem);
+                    
+                } else {
+                    $multilingualMenuItem = new Item(
+                        '',
+                        h(tc('Locale', 'Default Content'))
+                    );
                 }
-                // let's handle the breadcrumb dropdown for localized stacks
+                $breadcrumb->add($multilingualMenuItem);
                 if ($stackOrFolder->isNeutralStack()) {
                     $neutralStack = $stackOrFolder;
                 } else {
@@ -97,7 +102,7 @@ class DashboardStacksBreadcrumbFactory implements ApplicationAwareInterface
                 ];
 
                 foreach ($sections as $sectionLocale => $section) {
-                    /* @var Section $section */
+                    /** @var \Concrete\Core\Multilingual\Page\Section\Section $section */
                     $localizedStackName = Flag::getSectionFlagIcon($section) . ' ' . h($section->getLanguageText());
                     if ($neutralStack->getLocalizedStack($section) !== null) {
                         $localizedStackName = '<strong>' . $localizedStackName . '</strong>';
@@ -108,13 +113,13 @@ class DashboardStacksBreadcrumbFactory implements ApplicationAwareInterface
                             $neutralStack->getCollectionID() . rawurlencode('@' . $sectionLocale
                             )
                         ),
-                        $localizedStackName . ' <span class="text-muted">' . h($sectionLocale) . '</span>',
+                        $localizedStackName . ' <span class="text-muted">(' . h($sectionLocale) . ')</span>',
                         $locale === $sectionLocale
                     );
                 }
 
                 foreach($children as $child) {
-                    $stackItem->addChild($child);
+                    $multilingualMenuItem->addChild($child);
                 }
 
             }

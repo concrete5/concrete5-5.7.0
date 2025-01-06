@@ -375,7 +375,11 @@ class UserList extends DatabaseItemList implements PagerProviderInterface, Pagin
     public function filterByGroup($group = '', $inGroup = true)
     {
         if (!($group instanceof \Concrete\Core\User\Group\Group)) {
-            $group = \Concrete\Core\User\Group\Group::getByName($group);
+            $groupName = $group;
+            $group = \Concrete\Core\User\Group\Group::getByName($groupName);
+            if (!$group) {
+                throw new \RuntimeException(t('Group "%s" does not exist.', $groupName));
+            }
         }
         $this->checkGroupJoin();
         $app = Application::getFacadeApplication();

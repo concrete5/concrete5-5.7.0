@@ -516,7 +516,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         $this->set('uh', $uh);
         $this->set('includeDescription', true);
         $this->set('includeName', true);
-        $this->set('bt', BlockType::getByHandle('page_list'));
+        $this->set('bt', BlockType::getByHandle($this->btHandle));
         $this->set('featuredAttributeUnusableReason', $this->checkSearchablePageAttributeKey('is_featured'));
         $this->set('thumbnailAttribute', CollectionAttributeKey::getByHandle('thumbnail'));
         $this->set('titleFormat', 'h5');
@@ -572,7 +572,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         }
         $uh = Core::make('helper/concrete/urls');
         $this->set('uh', $uh);
-        $this->set('bt', BlockType::getByHandle('page_list'));
+        $this->set('bt', BlockType::getByHandle($this->btHandle));
         $this->set('featuredAttributeUnusableReason', $this->checkSearchablePageAttributeKey('is_featured'));
         $this->set('thumbnailAttribute', CollectionAttributeKey::getByHandle('thumbnail'));
         $topicFilter = '';
