@@ -282,6 +282,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         $controller->displayFeaturedOnly = $this->request->get('displayFeaturedOnly') ?? false;
         $controller->displayAliases = $this->request->get('displayAliases') ?? false;
         $controller->paginate = $this->request->get('paginate') ?? false;
+        $controller->excludeCanonicalPaging = $this->request->get('excludeCanonicalPaging') ?? false;
         $controller->enableExternalFiltering = $this->request->get('enableExternalFiltering') ?? false;
         $controller->excludeCurrentPage = $this->request->get('excludeCurrentPage') ?? false;
         $controller->filterByRelated = $this->request->get('filterByRelated') ?? false;
