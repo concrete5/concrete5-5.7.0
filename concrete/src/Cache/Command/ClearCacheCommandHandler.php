@@ -72,7 +72,9 @@ class ClearCacheCommandHandler
     {
         $this->dispatcher->dispatch('on_cache_flush');
 
-        $this->logger->notice(t('Clearing cache with ClearCacheCommandHandler::handle().'));
+        if ($command->logCacheClear()) {
+            $this->logger->notice(t('Clearing cache with ClearCacheCommandHandler::handle().'));
+        }
 
         // Flush the cache objects
         $this->flushCaches();

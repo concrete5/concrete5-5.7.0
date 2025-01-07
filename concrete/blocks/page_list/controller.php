@@ -3,6 +3,7 @@ namespace Concrete\Block\PageList;
 
 use BlockType;
 use CollectionAttributeKey;
+use Concrete\Core\Attribute\Category\PageCategory;
 use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Block\View\BlockView;
@@ -396,8 +397,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         }
 
         if ($this->displayFeaturedOnly == 1) {
-            $cak = CollectionAttributeKey::getByHandle('is_featured');
-            if (is_object($cak)) {
+            if ($this->checkSearchablePageAttributeKey('is_featured') === '') {
                 $this->list->filterByIsFeatured(1);
             }
         }
@@ -514,7 +514,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         $this->set('includeDescription', true);
         $this->set('includeName', true);
         $this->set('bt', BlockType::getByHandle('page_list'));
-        $this->set('featuredAttribute', CollectionAttributeKey::getByHandle('is_featured'));
+        $this->set('featuredAttributeUnusableReason', $this->checkSearchablePageAttributeKey('is_featured'));
         $this->set('thumbnailAttribute', CollectionAttributeKey::getByHandle('thumbnail'));
         $this->set('titleFormat', 'h5');
         $this->set('topicFilter', '');
@@ -569,7 +569,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         $uh = Core::make('helper/concrete/urls');
         $this->set('uh', $uh);
         $this->set('bt', BlockType::getByHandle('page_list'));
-        $this->set('featuredAttribute', CollectionAttributeKey::getByHandle('is_featured'));
+        $this->set('featuredAttributeUnusableReason', $this->checkSearchablePageAttributeKey('is_featured'));
         $this->set('thumbnailAttribute', CollectionAttributeKey::getByHandle('thumbnail'));
         $topicFilter = '';
         if ($this->filterByRelated) {
@@ -659,6 +659,13 @@ class Controller extends BlockController implements UsesFeatureInterface
 
     public function validate($args)
     {
+        $args += [
+            'rss' => null,
+            'rssHandle' => '',
+            'rssTitle' => '',
+            'rssDescription' => ''
+        ];
+
         $e = Core::make('helper/validation/error');
         $vs = Core::make('helper/validation/strings');
         $pf = false;
@@ -766,6 +773,7 @@ class Controller extends BlockController implements UsesFeatureInterface
             'ptID' => 0,
             'filterDateOption' => 'all',
             'cParentID' => null,
+            'ignorePermissions' => 0,
         ];
 
         if (is_numeric($args['cParentID'])) {
@@ -900,5 +908,22 @@ class Controller extends BlockController implements UsesFeatureInterface
             }
         }
         $this->set('attributeKeys', $attributeKeys);
+    }
+
+    /**
+     * @return string the reason why the attribute key is not usable (or an empty string if it's usable)
+     */
+    protected function checkSearchablePageAttributeKey(string $handle): string
+    {
+        $category = $this->app->make(PageCategory::class);
+        $key = $category->getAttributeKeyByHandle($handle);
+        if ($key === null) {
+            return t('You must create the %s page attribute first.', "<code>{$handle}</code>");
+        }
+        if (!$key->isAttributeKeyContentIndexed()) {
+            return t('The %s page attribute must be indexed.', "<code>{$handle}</code>");
+        }
+        
+        return '';
     }
 }

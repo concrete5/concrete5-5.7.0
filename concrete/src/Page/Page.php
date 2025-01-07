@@ -61,6 +61,7 @@ use Queue;
 use Request;
 use Session;
 use Concrete\Core\Events\EventDispatcher;
+use Doctrine\DBAL\ParameterType;
 use UserInfo;
 
 /**
@@ -310,22 +311,42 @@ class Page extends Collection implements CategoryMemberInterface,
      *
      * @param string $path the page path (example: /path/to/page)
      * @param string $version the page version ('RECENT' for the most recent version, 'ACTIVE' for the currently published version, 'SCHEDULED' for the currently scheduled version, or an integer to retrieve a specific version ID)
-     * @param \Concrete\Core\Site\Tree\TreeInterface|null $tree
+     * @param \Concrete\Core\Entity\Site\Site|\Concrete\Core\Site\Tree\TreeInterface|null $tree
      *
      * @return \Concrete\Core\Page\Page
      */
-    public static function getByPath($path, $version = 'RECENT', TreeInterface $tree = null)
+    public static function getByPath($path, $version = 'RECENT', ?TreeInterface $tree = null)
     {
         $path = rtrim($path, '/'); // if the path ends in a / remove it.
         $cache = \Core::make('cache/request');
 
         if ($tree) {
-            $item = $cache->getItem(sprintf('site/page/path/%s/%s', $tree->getSiteTreeID(), trim($path, '/')));
+            if ($tree instanceof Site) {
+                $treeIDs = $tree->getSiteTreeIDs();
+                sort($treeIDs, SORT_NUMERIC);
+            } else {
+                $treeIDs = [$tree->getSiteTreeID()];
+            }
+            $item = $cache->getItem(sprintf('site/page/path/%s/%s', implode('-', $treeIDs), trim($path, '/')));
             $cID = $item->get();
             if ($item->isMiss()) {
-                $db = Database::connection();
-                $cID = $db->fetchColumn('select Pages.cID from PagePaths inner join Pages on Pages.cID = PagePaths.cID where cPath = ? and siteTreeID = ?', [$path, $tree->getSiteTreeID()]);
-                $cache->save($item->set($cID));
+                if ($treeIDs === []) {
+                    $cID = 0;
+                } else {
+                    $db = Database::connection();
+                    $cID = $db->fetchOne(
+                        'SELECT Pages.cID FROM PagePaths INNER JOIN Pages ON Pages.cID = PagePaths.cID WHERE siteTreeID IN (?) AND cPath = ? LIMIT 1',
+                        [
+                            $treeIDs,
+                            $path,
+                        ],
+                        [
+                            $db::PARAM_INT_ARRAY,
+                            ParameterType::STRING,
+                        ]
+                    );
+                    $cache->save($item->set($cID));
+                }
             }
         } else {
             $item = $cache->getItem(sprintf('page/path/%s', trim($path, '/')));
@@ -429,7 +450,7 @@ class Page extends Collection implements CategoryMemberInterface,
     /**
      * {@inheritdoc}
      *
-     * @see \Concrete\Core\Summary\Template\Category\CategoryMemberInterface::getSummaryCategoryHandle()
+     * @see \Concrete\Core\Summary\Category\CategoryMemberInterface::getSummaryCategoryHandle()
      */
     public function getSummaryCategoryHandle() : string
     {
@@ -877,7 +898,7 @@ class Page extends Collection implements CategoryMemberInterface,
      *
      * @return \Concrete\Core\Page\Page
      */
-    public static function getDraftsParentPage(Site $site = null)
+    public static function getDraftsParentPage(?Site $site = null)
     {
         $db = Database::connection();
         $site = $site ? $site : \Core::make('site')->getSite();
@@ -1019,60 +1040,73 @@ class Page extends Collection implements CategoryMemberInterface,
 
 
     /**
-     * Make an alias to a page.
-     *
-     * @param \Concrete\Core\Page\Page $parentPage The parent page
-     * @param mixed $c
-     *
-     * @return int The ID of the new collection
+     * @deprecated Use the createAlias() method
      */
     public function addCollectionAlias($c)
     {
+        return $this->createAlias($c)->getCollectionPointerOriginalID();
+    }
+
+    /**
+     * Make an alias to a page.
+     *
+     * @param \Concrete\Core\Page\Page $parentPage The page that will contain the alias
+     * @param array $options available keys:
+     * - name: the name of the alias  (default: the original page name)
+     * - handle: the handle of the alias to be created (default: the original page handle)
+     * - uID: the ID of the user that's creating the alias (default: the ID of the current user)
+     *
+     * @return \Concrete\Core\Page\Page
+     */
+    public function createAlias(Page $parentPage, array $options = [])
+    {
         $app = Application::getFacadeApplication();
-        $db = Database::connection();
-        // the passed collection is the parent collection
-        $cParentID = $c->getCollectionID();
-
-        $u = $app->make(User::class);
-        $uID = $u->getUserID();
-
-        $handle = (string) $this->getCollectionHandle();
+        $db = $app->make(Connection::class);
+        $cParentID = $parentPage->getCollectionID();
+        $uID = empty($options['uID']) ? 0 : (int) $options['uID'];
+        if ($uID === 0) {
+            $u = $app->make(User::class);
+            $uID = $u->getUserID();
+        }
+        $handle = empty($options['handle']) ? '' : (string) $options['handle'];
         if ($handle === '') {
-            $handle = Core::make('helper/text')->handle($this->getCollectionName());
+            $handle = (string) $this->getCollectionHandle();
+            if ($handle === '') {
+                $handle = $app->make('helper/text')->handle($this->getCollectionName());
+            }
         }
-        $cDisplayOrder = $c->getNextSubPageDisplayOrder();
-
-        $_cParentID = $c->getCollectionID();
-        $q = 'select PagePaths.cPath from PagePaths where cID = ?';
-        $v = [$_cParentID];
-        if ($_cParentID != static::getHomePageID()) {
-            $q .= ' and ppIsCanonical = ?';
-            $v[] = 1;
-        }
-        $cPath = $db->fetchColumn($q, $v);
-
-        $data = [
+        $name = empty($options['name']) ? '' : (string) $options['name'];
+        $cDisplayOrder = $parentPage->getNextSubPageDisplayOrder();
+        $cPath = $db->fetchColumn(
+            'SELECT cPath FROM PagePaths WHERE cID = ? ORDER BY ppIsCanonical DESC',
+            [$cParentID]
+        );
+        $collection = $this->addCollection([
             'handle' => $handle,
-            'name' => '',
-        ];
-        $cobj = parent::addCollection($data);
-        $newCID = $cobj->getCollectionID();
-        $siteTreeID = $c->getSiteTreeID();
-
-        $v = [$newCID, $siteTreeID, $cParentID, $uID, $this->getCollectionID(), $cDisplayOrder];
-        $q = 'insert into Pages (cID, siteTreeID, cParentID, uID, cPointerID, cDisplayOrder) values (?, ?, ?, ?, ?, ?)';
-        $r = $db->prepare($q);
-
-        $r->execute($v);
-
+            'name' => $name,
+        ]);
+        $newCID = $collection->getCollectionID();
+        $siteTreeID = $parentPage->getSiteTreeID();
+        $db->insert('Pages', [
+            'cID' => $newCID,
+            'siteTreeID' => $siteTreeID,
+            'cParentID' => $cParentID,
+            'uID' => $uID,
+            'cPointerID' => $this->getCollectionID(),
+            'cDisplayOrder' => $cDisplayOrder,
+        ]);
+        $db->insert('PagePaths', [
+            'cID' => $newCID,
+            'cPath' => $cPath . '/' . $handle,
+            'ppIsCanonical' => 1,
+            'ppGeneratedFromURLSlugs' => 1,
+        ]);
         PageStatistics::incrementParents($newCID);
-
-        $q2 = 'insert into PagePaths (cID, cPath, ppIsCanonical, ppGeneratedFromURLSlugs) values (?, ?, ?, ?)';
-        $v2 = [$newCID, $cPath . '/' . $handle, 1, 1];
-        $db->executeQuery($q2, $v2);
-        $pe = new Event(\Page::getByID($newCID));
+        $newPage = Page::getByID($newCID);
+        $pe = new Event($newPage);
         Events::dispatch('on_page_alias_add', $pe);
-        return $newCID;
+
+        return $newPage;
     }
 
     /**
@@ -1153,57 +1187,64 @@ class Page extends Collection implements CategoryMemberInterface,
     }
 
     /**
-     * Add a new external link as a child of this page.
-     *
-     * @param string $cName
-     * @param string $cLink
-     * @param bool $newWindow
-     *
-     * @return int The ID of the new collection
+     * @deprecated Use addExternalLink()
      */
     public function addCollectionAliasExternal($cName, $cLink, $newWindow = 0)
     {
+        return $this->addExternalLink($cName, $cLink, ['newWindow' => $newWindow])->getCollectionID();
+    }
+
+    /**
+     * Add a new external link as a child of this page.
+     *
+     * @param string $name The name of the link
+     * @param string $link The target of the link
+     * @param array $options available keys:
+     * - newWindow: should the link be opened in a new window (default: false)
+     * - handle: the handle of the link to be created (default: derive it from $name)
+     * - uID: the ID of the user that's creating the external link (default: the ID of the current user)
+     *
+     * @return \Concrete\Core\Page\Page The newly created page
+     */
+    public function addExternalLink($name, $link, array $options = [])
+    {
         $app = Application::getFacadeApplication();
-        $db = Database::connection();
-        $dt = Core::make('helper/text');
-        $ds = Core::make('helper/security');
-        $u = $app->make(User::class);
+        $db = $app->make(Connection::class);
 
-        $cParentID = $this->getCollectionID();
-        $uID = $u->getUserID();
-
-        // make the handle out of the title
-        $cLink = $ds->sanitizeURL($cLink);
-        $handle = $dt->urlify($cName);
-        $data = [
-            'handle' => $handle,
-            'name' => $cName,
-        ];
-        $cobj = parent::addCollection($data);
-        $newCID = $cobj->getCollectionID();
-
-        if ($newWindow) {
-            $newWindow = 1;
-        } else {
-            $newWindow = 0;
+        $link = $app->make('helper/security')->sanitizeURL($link);
+        $newWindow = empty($options['newWindow']) ? 0 : 1;
+        $handle = empty($options['handle']) ? '' : (string) $options['handle'];
+        if ($handle === '') {
+            $handle = $app->make('helper/text')->urlify($name);
         }
+        $uID = empty($options['uID']) ? 0 : (int) $options['uID'];
+        if ($uID === 0) {
+            $uID = $app->make(User::class)->getUserID();
+        }
+        $cParentID = $this->getCollectionID();
+        $siteTreeID = $this->getSiteTreeID() ?: $app->make('site')->getSite()->getSiteTreeID();
+        $displayOrder = $this->getNextSubPageDisplayOrder();
 
-        $cInheritPermissionsFromCID = $this->getPermissionsCollectionID();
-        $cInheritPermissionsFrom = 'PARENT';
-
-        $siteTreeID = \Core::make('site')->getSite()->getSiteTreeID();
-
-        $v = [$newCID, $siteTreeID, $cParentID, $uID, $cInheritPermissionsFrom, (int) $cInheritPermissionsFromCID, $cLink, $newWindow];
-        $q = 'insert into Pages (cID, siteTreeID, cParentID, uID, cInheritPermissionsFrom, cInheritPermissionsFromCID, cPointerExternalLink, cPointerExternalLinkNewWindow) values (?, ?, ?, ?, ?, ?, ?, ?)';
-        $r = $db->prepare($q);
-
-        $r->execute($v);
-
+        $collection = $this->addCollection([
+            'handle' => $handle,
+            'name' => $name,
+        ]);
+        $newCID = $collection->getCollectionID();
+        $db->insert('Pages', [
+            'cID' => $newCID,
+            'siteTreeID' => $siteTreeID,
+            'cParentID' => $cParentID,
+            'uID' => $uID,
+            'cInheritPermissionsFrom' => 'PARENT',
+            'cInheritPermissionsFromCID' => (int) (int) $this->getPermissionsCollectionID(),
+            'cPointerExternalLink' => $link,
+            'cPointerExternalLinkNewWindow' => $newWindow,
+            'cDisplayOrder' => $displayOrder,
+        ]);
         PageStatistics::incrementParents($newCID);
+        $newPage = Page::getByID($newCID);
 
-        self::getByID($newCID)->movePageDisplayOrderToBottom();
-
-        return $newCID;
+        return $newPage;
     }
 
     /**
@@ -1402,7 +1443,7 @@ class Page extends Collection implements CategoryMemberInterface,
      */
     public function export($pageNode)
     {
-        $exporter = new Exporter();
+        $exporter = $this->getExporter();
         $exporter->export($this, $pageNode);
     }
 
@@ -2090,7 +2131,7 @@ class Page extends Collection implements CategoryMemberInterface,
      *
      * @param \Concrete\Core\Page\Type\Type|null $type
      */
-    public function setPageType(\Concrete\Core\Page\Type\Type $type = null)
+    public function setPageType(?\Concrete\Core\Page\Type\Type $type = null)
     {
         $ptID = 0;
         if (is_object($type)) {
@@ -2288,18 +2329,28 @@ EOT
     /**
      * Get the immediate children of the this page.
      *
+     * @since 9.3.6 Added the $version parameter
+     * @param string $version the page version ('RECENT' for the most recent version, 'ACTIVE' for the currently published version, 'SCHEDULED' for the currently scheduled version, or an integer to retrieve a specific version ID)
      * @return \Concrete\Core\Page\Page[]
      */
-    public function getCollectionChildren()
+    public function getCollectionChildren($version = 'RECENT')
     {
         $children = [];
-        $db = Database::connection();
-        $q = 'select cID from Pages where cParentID = ? and cIsTemplate = 0 order by cDisplayOrder asc';
-        $r = $db->executeQuery($q, [$this->getCollectionID()]);
+        $app = Application::getFacadeApplication();
+        /** @var Connection $connection */
+        $connection = $app->make(Connection::class);
+        $r = $connection->createQueryBuilder()
+            ->select('cID')
+            ->from('Pages')
+            ->where('cParentID = :cParentID')
+            ->andWhere('cIsTemplate = 0')
+            ->orderBy('cDisplayOrder', 'asc')
+            ->setParameter('cParentID', $this->getCollectionID())
+            ->execute();
         if ($r) {
-            while ($row = $r->fetch()) {
+            while ($row = $r->fetchAssociative()) {
                 if ($row['cID'] > 0) {
-                    $c = self::getByID($row['cID']);
+                    $c = self::getByID($row['cID'], $version);
                     $children[] = $c;
                 }
             }
@@ -2414,7 +2465,8 @@ EOT
      *     @var int $ptID
      *     @var int $pTemplateID
      *     @var int $uID
-     *     @var string $$cFilename
+     *     @var int $pkgID
+     *     @var string $cFilename
      *     @var int $cCacheFullPageContent -1: use the default settings; 0: no; 1: yes
      *     @var int $cCacheFullPageContentLifetimeCustom
      *     @var string $cCacheFullPageContentOverrideLifetime
@@ -2432,7 +2484,7 @@ EOT
         $cDescription = $this->getCollectionDescription();
         $cDatePublic = $this->getCollectionDatePublic();
         $uID = $this->getCollectionUserID();
-        $pkgID = $this->getPackageID();
+        $pkgID = empty($data['pkgID']) ? $this->getPackageID() : $data['pkgID'];
         $cFilename = $this->getCollectionFilename();
         $pTemplateID = $this->getPageTemplateID();
         $ptID = $this->getPageTypeID();
@@ -2946,7 +2998,7 @@ EOT
      *
      * @return \Concrete\Core\Page\Page
      */
-    public function duplicateAll($nc = null, $preserveUserID = false, Site $site = null)
+    public function duplicateAll($nc = null, $preserveUserID = false, ?Site $site = null)
     {
         $nc2 = $this->duplicate($nc, $preserveUserID, $site);
         self::_duplicateAll($this, $nc2, $preserveUserID, $site);
@@ -2964,7 +3016,7 @@ EOT
      *
      * @return \Concrete\Core\Page\Page
      */
-    public function duplicate($nc = null, $preserveUserID = false, TreeInterface $site = null)
+    public function duplicate($nc = null, $preserveUserID = false, ?TreeInterface $site = null)
     {
         $app = Application::getFacadeApplication();
         $cloner = $app->make(Cloner::class);
@@ -3530,7 +3582,7 @@ EOT
      */
     public function getPageIndexScore()
     {
-        return round($this->cIndexScore, 2);
+        return round($this->cIndexScore??0, 2);
     }
 
     /**
@@ -3552,7 +3604,7 @@ EOT
      *
      * @return \Concrete\Core\Page\Page
      **/
-    public static function addHomePage(TreeInterface $siteTree = null)
+    public static function addHomePage(?TreeInterface $siteTree = null)
     {
         $app = Application::getFacadeApplication();
         // creates the home page of the site
@@ -3944,7 +3996,7 @@ EOT
      *
      * @see \Concrete\Core\Page\Collection\Collection::createCollection()
      */
-    public static function addStatic($data, TreeInterface $parent = null)
+    public static function addStatic($data, ?TreeInterface $parent = null)
     {
         $db = Database::connection();
         if ($parent instanceof self) {
@@ -4125,7 +4177,7 @@ EOT
      * @param mixed $cParent
      * @param mixed $cNewParent
      */
-    protected function _duplicateAll($cParent, $cNewParent, $preserveUserID = false, Site $site = null)
+    protected function _duplicateAll($cParent, $cNewParent, $preserveUserID = false, ?Site $site = null)
     {
         $db = Database::connection();
         $cID = $cParent->getCollectionID();

@@ -214,14 +214,14 @@ class Controller extends BlockController implements UsesFeatureInterface
                 $args['internalLinkCID'] = 0;
                 break;
         }
-        $args['paragraph'] = LinkAbstractor::translateTo($args['paragraph']);
+        $args['paragraph'] = isset($args['paragraph']) ? LinkAbstractor::translateTo($args['paragraph']) : '';
         /** @var SanitizeService $security */
         $security = $this->app->make('helper/security');
         $args['icon'] = isset($args['icon']) ? $security->sanitizeString($args['icon']) : '';
-        $args['title'] = $security->sanitizeString($args['title']);
-        $args['titleFormat'] = $security->sanitizeString($args['titleFormat']);
-        $args['internalLinkCID'] = $security->sanitizeInt($args['internalLinkCID']);
-        $args['externalLink'] = $security->sanitizeURL($args['externalLink']);
+        $args['title'] = isset($args['title']) ? $security->sanitizeString($args['title']) : '';
+        $args['titleFormat'] = isset($args['titleFormat']) ? $security->sanitizeString($args['titleFormat']) : '';
+        $args['internalLinkCID'] = isset($args['internalLinkCID']) ? $security->sanitizeInt($args['internalLinkCID']) : 0;
+        $args['externalLink'] = isset($args['externalLink']) ? $security->sanitizeURL($args['externalLink']) : '';
         unset($args['linkType']);
 
         $args = $args + [

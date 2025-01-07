@@ -497,7 +497,7 @@ class File extends Controller
                     throw new UserMessageException(t('Could not open with ZipArchive::CREATE'));
                 }
                 foreach ($files as $key => $f) {
-                    $filename = $f->getFilename();
+                    $filename = $f->getFileNameForPresentation();
 
                     // Change the filename if it's already in the zip
                     if ($zip->locateName($filename) !== false) {
@@ -790,15 +790,15 @@ class File extends Controller
             try {
                 $url = Url::createFromUrl($u);
             } catch (RuntimeException $x) {
-                throw new UserMessageException(t('The URL "%s" is not valid: %s', $u, $x->getMessage()));
+                throw new UserMessageException(h(t('The URL "%s" is not valid: %s', $u, $x->getMessage())));
             }
             $scheme = (string)$url->getScheme();
             if ($scheme === '') {
-                throw new UserMessageException(t('The URL "%s" is not valid.', $u));
+                throw new UserMessageException(h(t('The URL "%s" is not valid.', $u)));
             }
             $host = trim((string)$url->getHost());
             if (in_array(strtolower($host), ['', '0', 'localhost'], true)) {
-                throw new UserMessageException(t('The URL "%s" is not valid.', $u));
+                throw new UserMessageException(h(t('The URL "%s" is not valid.', $u)));
             }
 
             // If we've already validated this hostname just skip it.
@@ -813,7 +813,7 @@ class File extends Controller
 
             foreach ($ipFormatBlocks as $block) {
                 if (preg_match($block, $host) !== 0) {
-                    throw new UserMessageException(t('The URL "%s" is not valid.', $u));
+                    throw new UserMessageException(h(t('The URL "%s" is not valid.', $u)));
                 }
             }
 
@@ -828,7 +828,7 @@ class File extends Controller
             }
 
             if ($ip !== null && $ip->getRangeType() !== IPRangeType::T_PUBLIC) {
-                throw new UserMessageException(t('The URL "%s" is not valid.', $u));
+                throw new UserMessageException(h(t('The URL "%s" is not valid.', $u)));
             }
 
             $validIps[$host] = $ip->toString();
@@ -847,7 +847,7 @@ class File extends Controller
      * @throws \Concrete\Core\Error\UserMessageException in case of errors
      *
      */
-    protected function downloadRemoteURL($url, $temporaryDirectory, string $ip = null)
+    protected function downloadRemoteURL($url, $temporaryDirectory, ?string $ip = null)
     {
         /** @var Client $client */
         $client = $this->app->make(Client::class);
@@ -1190,8 +1190,17 @@ class File extends Controller
                 $incomingStorageLocation = $incoming->getIncomingStorageLocation()->getDisplayName();
 
                 $files = $incoming->getIncomingFilesystem()->listContents($incomingPath);
+                $files = array_values(array_filter(
+                    $files,
+                    static function (array $item) {
+                        return $item['type'] === 'file'; 
+                    }
+                ));
 
                 foreach (array_keys($files) as $index) {
+                    if (!isset($files[$index]['extension'])) {
+                        $files[$index]['extension'] = '';
+                    }
                     $files[$index]['allowed'] = $fh->extension($files[$index]['basename']);
                     $files[$index]['thumbnail'] = FileTypeList::getType($files[$index]['extension'])->getThumbnail();
                     $files[$index]['displaySize'] = $nh->formatSize($files[$index]['size'], 'KB');

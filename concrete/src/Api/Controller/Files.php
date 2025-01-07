@@ -308,7 +308,7 @@ class Files extends ApiController
         }
 
         $checker = new Checker($file);
-        if (!$checker->canEditFile()) {
+        if (!$checker->canEditFileProperties()) {
             return $this->error(t('You do not have access to edit this file.', 401));
         }
 
@@ -373,12 +373,25 @@ class Files extends ApiController
             return $this->error(t('File not found'), 404);
         }
 
-        $checker = new Checker($file);
-        if (!$checker->canEditFile()) {
-            return $this->error(t('You do not have access to edit this file.', 401));
+        $fileNode = $file->getFileNodeObject();
+        if ($fileNode) {
+            $checker = new Checker($fileNode);
+            if (!$checker->canEditTreeNode()) {
+                return $this->error(t('You are not allowed to move this file.'), 401);
+            }
+        } else {
+            return $this->error(t('Invalid source file object.'), 404);
         }
 
         $folderID = $this->request->request->get('folder');
+        $destNode = Node::getByID($folderID);
+        if ($destNode) {
+            $checker = new Checker($destNode);
+            if (!$checker->canAddTreeSubNode()) {
+                return $this->error(t('You are not allowed to move files to this location.'), 403);
+            }
+        }
+
         $folder = null;
         if ($folderID) {
             $folder = FileFolder::getByID($folderID);
@@ -386,13 +399,12 @@ class Files extends ApiController
         if (!$folder instanceof FileFolder) {
             return $this->error(t('Unable to find specified folder'), 400);
         }
-
         $fp = new Checker($folder);
         if (!$fp->canAddFileType($file->getExtension())) {
             return $this->error(t('You do not have access to move this file to the specified location.'), 403);
         }
 
-        $file->getFileNodeObject()->move($folder);
+        $fileNode->move($folder);
 
         return $this->transform($file, new FileTransformer(), Resources::RESOURCE_FILES);
     }

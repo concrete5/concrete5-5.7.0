@@ -393,6 +393,18 @@ class Detector implements ApplicationAwareInterface, SiteAggregateInterface
     }
 
     /**
+     * Assume that the site is multilingual enabled.
+     *
+     * @return $this
+     */
+    public function assumeEnabled()
+    {
+        $this->enabled = true;
+
+        return $this;
+    }
+
+    /**
      * Check if we can set a session value.
      *
      * @return bool

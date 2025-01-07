@@ -85,6 +85,11 @@ class Controller extends BlockController implements UsesFeatureInterface, FileTr
      */
     public $includeSwitchLanguage;
 
+    /**
+     * @var bool|int|string|null
+     */
+    public $ignorePermissions;
+
     public $helpers = ['form'];
 
     protected $btInterfaceWidth = 640;
@@ -142,6 +147,7 @@ class Controller extends BlockController implements UsesFeatureInterface, FileTr
         $this->set('searchInputFormActionPageID', null);
         $this->set('brandingText', $brandingText);
         $this->set('includeSwitchLanguage', $detector->isEnabled());
+        $this->set('ignorePermissions', false);
         $this->edit();
     }
 
@@ -157,7 +163,7 @@ class Controller extends BlockController implements UsesFeatureInterface, FileTr
     protected function includePageInNavigation(Page $page)
     {
         $checker = new Checker($page);
-        if ($checker->canViewPage() && !$page->getAttribute('exclude_nav')) {
+        if (($checker->canViewPage() || $this->ignorePermissions) && !$page->getAttribute('exclude_nav')) {
             return true;
         }
         return false;
@@ -203,10 +209,13 @@ class Controller extends BlockController implements UsesFeatureInterface, FileTr
 
     protected function getNavigation(): Navigation
     {
-        $home = $this->getHomePage();
-        $children = $home->getCollectionChildren();
         $navigation = $this->app->make(Navigation::class);
+        if (!$this->includeNavigation) {
+            return $navigation;
+        }
 
+        $home = $this->getHomePage();
+        $children = $home->getCollectionChildren('ACTIVE');
         $current = Page::getCurrentPage();
         $parentIDs = $this->getParentIDsToCurrent();
 
@@ -218,7 +227,7 @@ class Controller extends BlockController implements UsesFeatureInterface, FileTr
                 }
                 $item->setIsActive($current->getCollectionID() === $child->getCollectionID());
                 if ($this->includeSubPagesInNavigation($child)) {
-                    $dropdownChildren = $child->getCollectionChildren();
+                    $dropdownChildren = $child->getCollectionChildren('ACTIVE');
                     foreach ($dropdownChildren as $dropdownChild) {
                         if ($this->includePageInNavigation($dropdownChild)) {
                             $dropdownChildItem = $this->app->make(PageItem::class, ['page' => $dropdownChild]);
@@ -297,6 +306,7 @@ class Controller extends BlockController implements UsesFeatureInterface, FileTr
         $data['includeSearchInput'] = !empty($args['includeSearchInput']) ? 1 : 0;
         $data['includeStickyNav'] = !empty($args['includeStickyNav']) ? 1 : 0;
         $data['includeSwitchLanguage'] = !empty($args['includeSwitchLanguage']) ? 1 : 0;
+        $data['ignorePermissions'] = !empty($args['ignorePermissions']) ? 1 : 0;
 
         $data['includeBrandLogo'] = 0;
         $data['includeBrandText'] = 0;

@@ -653,14 +653,6 @@
             </attributes>
         </page>
 
-        <page name="Connect to the Community" path="/dashboard/extend/connect" filename="/dashboard/extend/connect.php"
-              pagetype="" description="Connect to the Concrete community." package="">
-            <attributes>
-                <attributekey handle="meta_keywords">
-                    <value>concretecms.com, my account, marketplace</value>
-                </attributekey>
-            </attributes>
-        </page>
         <page name="Get More Themes" path="/dashboard/extend/themes" filename="/dashboard/extend/themes.php" pagetype=""
               description="Download themes from the marketplace." package="">
             <attributes>
@@ -698,6 +690,15 @@
             </attributes>
         </page>
 
+        <page name="Marketplace" path="/dashboard/system/basics/marketplace" filename="/dashboard/system/basics/marketplace.php"
+              pagetype="" description="Connect to the Concrete CMS marketplace." package="">
+            <attributes>
+                <attributekey handle="meta_keywords">
+                    <value>concretecms.com, my account, purchase, extensions, marketplace</value>
+                </attributekey>
+            </attributes>
+        </page>
+
         <page name="Production Mode" path="/dashboard/system/basics/production_mode"
               filename="/dashboard/system/basics/production_mode.php"
               pagetype="" description="" package="">
@@ -727,14 +728,6 @@
             </attributes>
         </page>
 
-        <page name="Social Links" path="/dashboard/system/basics/social" filename="/dashboard/system/basics/social.php"
-              pagetype="" description="" package="">
-            <attributes>
-                <attributekey handle="meta_keywords">
-                    <value>sharing, facebook, twitter</value>
-                </attributekey>
-            </attributes>
-        </page>
         <page name="Bookmark Icons" path="/dashboard/system/basics/icons" filename="/dashboard/system/basics/icons.php"
               pagetype="" description="Bookmark icon and mobile home screen icon setup." package="">
             <attributes>
@@ -806,6 +799,27 @@
             </attributes>
         </page>
 
+        <page name="Social &amp; Sharing" path="/dashboard/system/social" filename="/dashboard/system/social.php"
+              pagetype="" description="" package="">
+        </page>
+
+        <page name="Social Links" path="/dashboard/system/social/social_links" filename="/dashboard/system/social/social_links.php"
+              pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="meta_keywords">
+                    <value>sharing, facebook, twitter</value>
+                </attributekey>
+            </attributes>
+        </page>
+
+        <page name="Open Graph" path="/dashboard/system/social/opengraph" filename="/dashboard/system/social/opengraph.php"
+              pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="meta_keywords">
+                    <value>sharing, opengraph, schema</value>
+                </attributekey>
+            </attributes>
+        </page>
 
         <page name="Express" path="/dashboard/system/express" filename="/dashboard/system/express/view.php" pagetype=""
               description="Express" package=""/>
@@ -979,6 +993,14 @@
             <attributes>
                 <attributekey handle="meta_keywords">
                     <value>security, files, media, extension, manager, upload</value>
+                </attributekey>
+            </attributes>
+        </page>
+        <page name="File Chooser Options" path="/dashboard/system/files/file_chooser"
+              filename="/dashboard/system/files/file_chooser.php" pagetype="" description="" package="">
+            <attributes>
+                <attributekey handle="meta_keywords">
+                    <value>file, chooser</value>
                 </attributekey>
             </attributes>
         </page>
@@ -1369,7 +1391,7 @@
               filename="/dashboard/system/calendar/import.php" pagetype=""
               description="" package=""/>
 
-        <page name="Boards" path="/dashboard/system/boards"
+        <page name="Boards &amp; Summary" path="/dashboard/system/boards"
               filename="/dashboard/system/boards/view.php" pagetype=""
               description="Manage global board settings" package=""/>
         <page name="Board Settings" path="/dashboard/system/boards/settings"
@@ -1378,7 +1400,9 @@
         <page name="Permissions" path="/dashboard/system/boards/permissions"
               filename="/dashboard/system/boards/permissions.php" pagetype=""
               description="" package=""/>
-
+        <page name="Summary Templates" path="/dashboard/system/boards/summary_templates"
+              filename="/dashboard/system/boards/summary_templates.php" pagetype=""
+              description="" package=""/>
         <page name="Conversations" path="/dashboard/system/conversations"
               filename="/dashboard/system/conversations/view.php" pagetype=""
               description="Manage your conversations settings" package="">
@@ -1467,11 +1491,11 @@
                 </attributekey>
             </attributes>
         </page>
-        <page name="Debug Settings" path="/dashboard/system/environment/debug"
-              filename="/dashboard/system/environment/debug.php" pagetype="" description="" package="">
+        <page name="Error Handling" path="/dashboard/system/environment/errors"
+              filename="/dashboard/system/environment/errors.php" pagetype="" description="" package="">
             <attributes>
                 <attributekey handle="meta_keywords">
-                    <value>errors, exceptions, develop, support, help</value>
+                    <value>error, exception, debug</value>
                 </attributekey>
             </attributes>
         </page>

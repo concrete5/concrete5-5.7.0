@@ -1,6 +1,7 @@
 <?php
 namespace Concrete\Block\EventList;
 
+use Concrete\Core\Attribute\Category\EventCategory;
 use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Feature\Features;
 use Concrete\Core\Feature\UsesFeatureInterface;
@@ -180,7 +181,9 @@ class Controller extends BlockController implements UsesFeatureInterface
             //$list->filterByEndTimeAfter($time);
             $list->filterByCalendar($calendar);
             if ($this->filterByFeatured) {
-                $list->filterByAttribute('is_featured', true);
+                if ($this->checkSearchableEventAttributeKey('is_featured') === '') {
+                    $list->filterByAttribute('is_featured', true);
+                }
             }
             if ($this->filterByTopicAttributeKeyID) {
                 $ak = EventKey::getByID($this->filterByTopicAttributeKeyID);
@@ -264,7 +267,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         }
         $this->set('pageAttributeKeys', $pageAttributeKeys);
         $this->set('calendars', $calendarSelect);
-        $this->set('featuredAttribute', EventKey::getByHandle('is_featured'));
+        $this->set('featuredAttributeUnusableReason', $this->checkSearchableEventAttributeKey('is_featured'));
         $this->set('pageSelector', Core::make("helper/form/page_selector"));
 
         $number = new Numbers();
@@ -346,5 +349,22 @@ class Controller extends BlockController implements UsesFeatureInterface
         $args['linkToPage'] = intval($args['linkToPage']);
         $args['filterByFeatured'] = intval($args['filterByFeatured'] ?? null);
         parent::save($args);
+    }
+
+    /**
+     * @return string the reason why the attribute key is not usable (or an empty string if it's usable)
+     */
+    protected function checkSearchableEventAttributeKey(string $handle): string
+    {
+        $category = $this->app->make(EventCategory::class);
+        $key = $category->getAttributeKeyByHandle($handle);
+        if ($key === null) {
+            return t('You must create the %s event attribute first.', "<code>{$handle}</code>");
+        }
+        if (!$key->isAttributeKeyContentIndexed()) {
+            return t('The %s event attribute must be indexed.', "<code>{$handle}</code>");
+        }
+
+        return '';
     }
 }

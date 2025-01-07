@@ -155,6 +155,11 @@ class Controller extends BlockController implements UsesFeatureInterface
 
     public function save($args)
     {
+        $args += [
+            'cloudCount' => 0,
+            'targetCID' => 0
+        ];
+
         $ak = $this->loadAttribute();
         $cID = $this->request->request->get('cID');
         if (!$cID) {
@@ -178,7 +183,7 @@ class Controller extends BlockController implements UsesFeatureInterface
         parent::save($args);
     }
 
-    public function getTagLink(SelectValueOption $option = null)
+    public function getTagLink(?SelectValueOption $option = null)
     {
         $target = $this->get('target');
         if (!is_object($target)) {

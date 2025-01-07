@@ -4,7 +4,6 @@ namespace Concrete\Core\Board\Instance\Slot\Content;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Normalizer\DenormalizableInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizableInterface;
 
 class ObjectCollection implements \JsonSerializable, DenormalizableInterface
 {
@@ -35,6 +34,22 @@ class ObjectCollection implements \JsonSerializable, DenormalizableInterface
         return [
             'objects' => $this->getContentObjects()
         ];
+    }
+
+    /**
+     * Takes an object collection and refreshes all objects within it, returning a new object collection
+     * @return self
+     */
+    public function refresh(): self
+    {
+        $app = app();
+        $updatedObjectCollection = new ObjectCollection();
+        $objects = $this->getContentObjects();
+        foreach ($objects as $contentSlot => $object) {
+            $object->refresh($app);
+            $updatedObjectCollection->addContentObject($contentSlot, $object);
+        }
+        return $updatedObjectCollection;
     }
 
     public function denormalize(DenormalizerInterface $denormalizer, $data, $format = null, array $context = [])

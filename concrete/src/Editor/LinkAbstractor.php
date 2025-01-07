@@ -142,24 +142,27 @@ class LinkAbstractor extends ConcreteObject
                     $fo = \Concrete\Core\File\File::getByID($fID);
                 }
                 if ($fo !== null) {
+                    $usePictureTag = null;
                     $style = (string) $picture->style;
                     // move width px to width attribute and height px to height attribute
                     $widthPattern = '/(?:^width|[^-]width):\\s([0-9]+)px;?/i';
                     if (preg_match($widthPattern, $style, $matches)) {
                         $style = preg_replace($widthPattern, '', $style);
                         $picture->width = $matches[1];
+                        $usePictureTag = false;
                     }
                     $heightPattern = '/(?:^height|[^-]height):\\s([0-9]+)px;?/i';
                     if (preg_match($heightPattern, $style, $matches)) {
                         $style = preg_replace($heightPattern, '', $style);
                         $picture->height = $matches[1];
+                        $usePictureTag = false;
                     }
                     if ($style === '') {
                         unset($picture->style);
                     } else {
                         $picture->style = $style;
                     }
-                    $image = new Image($fo);
+                    $image = new Image($fo, ['usePictureTag' => $usePictureTag]);
                     $tag = $image->getTag();
 
                     foreach ($picture->attr as $attr => $val) {

@@ -45,7 +45,7 @@ class DashboardStacksBreadcrumbFactory implements ApplicationAwareInterface
         $this->navigation = $navigation;
     }
 
-    public function getBreadcrumb(Page $dashboardPage, $stackOrFolder = null, array $sections = null, $locale = ''): BreadcrumbInterface
+    public function getBreadcrumb(Page $dashboardPage, $stackOrFolder = null, ?array $sections = null, $locale = ''): BreadcrumbInterface
     {
         $breadcrumb = $this->breadcrumbFactory->getBreadcrumb($dashboardPage);
         $breadcrumb->setSanitizeName(false);
@@ -72,6 +72,13 @@ class DashboardStacksBreadcrumbFactory implements ApplicationAwareInterface
                 $breadcrumb->add($stackItem);
             }
             if ($stackOrFolder instanceof Stack) {
+                if ($locale !== '') {
+                    $stackItem = new Item(
+                        '',
+                        $locale
+                    );
+                    $breadcrumb->add($stackItem);
+                }
                 // let's handle the breadcrumb dropdown for localized stacks
                 if ($stackOrFolder->isNeutralStack()) {
                     $neutralStack = $stackOrFolder;

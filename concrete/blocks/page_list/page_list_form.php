@@ -18,48 +18,50 @@ use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\Support\Facade\Url;
 use Concrete\Core\Form\Service\Widget\DateTime;
 
-/** @var Controller $controller */
-/** @var int $num */
-/** @var string $orderBy */
-/** @var int $cParentID */
-/** @var bool $cThis */
-/** @var bool $cThisParent */
-/** @var bool $useButtonForLink */
-/** @var string $buttonLinkText */
-/** @var string $pageListTitle */
-/** @var bool $filterByRelated */
-/** @var bool $filterByCustomTopic */
-/** @var string $topicFilter */
-/** @var string $filterDateOption */
-/** @var int $filterDateDays */
-/** @var string $filterDateStart */
-/** @var string $filterDateEnd */
-/** @var string $relatedTopicAttributeKeyHandle */
-/** @var string $customTopicAttributeKeyHandle */
-/** @var int $customTopicTreeNodeID */
-/** @var bool $includeName */
-/** @var bool $includeDate */
-/** @var bool $includeDescription */
-/** @var bool $includeAllDescendents */
-/** @var bool $paginate */
-/** @var bool $displaySystemPages */
-/** @var bool $displayAliases */
-/** @var bool $ignorePermissions */
-/** @var bool $enableExternalFiltering */
-/** @var int $ptID */
-/** @var int $pfID */
-/** @var int $truncateSummaries */
-/** @var bool $displayFeaturedOnly */
-/** @var string $noResultsMessage */
-/** @var bool $displayThumbnail */
-/** @var int $truncateChars */
-/** @var Urls $uh */
-/** @var BlockType $bt */
-/** @var CollectionKey $featuredAttribute */
-/** @var Category[] $attributeKeys */
-/** @var BlockType $thumbnailAttribute */
-/** @var bool $isOtherPage */
-/** @var Feed $rssFeed */
+/**
+ * @var Controller $controller
+ * @var int $num
+ * @var string $orderBy
+ * @var int $cParentID
+ * @var bool $cThis
+ * @var bool $cThisParent
+ * @var bool $useButtonForLink
+ * @var string $buttonLinkText
+ * @var string $pageListTitle
+ * @var bool $filterByRelated
+ * @var bool $filterByCustomTopic
+ * @var string $topicFilter
+ * @var string $filterDateOption
+ * @var int $filterDateDays
+ * @var string $filterDateStart
+ * @var string $filterDateEnd
+ * @var string $relatedTopicAttributeKeyHandle
+ * @var string $customTopicAttributeKeyHandle
+ * @var int $customTopicTreeNodeID
+ * @var bool $includeName
+ * @var bool $includeDate
+ * @var bool $includeDescription
+ * @var bool $includeAllDescendents
+ * @var bool $paginate
+ * @var bool $displaySystemPages
+ * @var bool $displayAliases
+ * @var bool $ignorePermissions
+ * @var bool $enableExternalFiltering
+ * @var int $ptID
+ * @var int $pfID
+ * @var int $truncateSummaries
+ * @var bool $displayFeaturedOnly
+ * @var string $noResultsMessage
+ * @var bool $displayThumbnail
+ * @var int $truncateChars
+ * @var Urls $uh
+ * @var BlockType $bt
+ * @var string $featuredAttributeUnusableReason
+ * @var Category[] $attributeKeys
+ * @var BlockType $thumbnailAttribute
+ * @var bool $isOtherPage
+ * @var Feed $rssFeed
+ */
 
 if (!isset($filterDateDays)) {
     $filterDateDays = false;
@@ -283,21 +285,22 @@ echo $userInterface->tabs([
                         "name" => "displayFeaturedOnly"
                     ];
 
-                    if (!is_object($featuredAttribute)) {
+                    if (!empty($featuredAttributeUnusableReason)) {
                         $miscFields["disabled"] = "disabled";
                     }
 
                     echo $form->checkbox("displayFeaturedOnly", "1", $displayFeaturedOnly, $miscFields);
                     echo $form->label("featuredPagesOnly", t("Featured pages only."), ["class" => "form-check-label"]);
-                    ?>
 
-                    <?php if (!is_object($featuredAttribute)) { ?>
-                        <div class="help-block">
-                            <?php echo t(
-                                '(<strong>Note</strong>: You must create the "is_featured" page attribute first.)');
-                            ?>
+                    if (!empty($featuredAttributeUnusableReason)) {
+                        ?>
+                        <div class="alert alert-info">
+                            <strong><?= t('Note') ?></strong>
+                            <?= $featuredAttributeUnusableReason ?>
                         </div>
-                    <?php } ?>
+                        <?php
+                    }
+                    ?>
                 </div>
 
                 <div class="form-check">

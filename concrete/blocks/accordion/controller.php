@@ -190,10 +190,10 @@ class Controller extends BlockController implements UsesFeatureInterface
     }
 
     /**
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @return string
      * @throws \Doctrine\DBAL\Exception
      *
-     * @return string
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function getSearchableContent()
     {
@@ -211,20 +211,27 @@ class Controller extends BlockController implements UsesFeatureInterface
     }
 
     /**
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @return void
      * @throws \Doctrine\DBAL\Exception
      *
-     * @return void
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function edit()
     {
         /** @var Connection $db */
         $db = $this->app->make(Connection::class);
-        $query = $db->fetchAllAssociative('SELECT * FROM btAccordionEntries WHERE bID = ? ORDER BY sortOrder', [$this->bID]);
+        $query = $db->fetchAllAssociative(
+            'SELECT * FROM btAccordionEntries WHERE bID = ? ORDER BY sortOrder',
+            [$this->bID]
+        );
 
         $entries = [];
         foreach ($query as $row) {
-            $entry = new AccordionEntry($row['id'], $row['title'], LinkAbstractor::translateFromEditMode($row['description']));
+            $entry = new AccordionEntry(
+                $row['id'],
+                $row['title'],
+                LinkAbstractor::translateFromEditMode($row['description'])
+            );
             $entries[] = $entry;
         }
 
@@ -232,16 +239,19 @@ class Controller extends BlockController implements UsesFeatureInterface
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * @return void
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
-     * @return void
+     * @throws \Doctrine\DBAL\Exception
      */
     public function view()
     {
         /** @var Connection $db */
         $db = $this->app->make(Connection::class);
-        $query = $db->fetchAllAssociative('SELECT * FROM btAccordionEntries WHERE bID = ? ORDER BY sortOrder', [$this->bID]);
+        $query = $db->fetchAllAssociative(
+            'SELECT * FROM btAccordionEntries WHERE bID = ? ORDER BY sortOrder',
+            [$this->bID]
+        );
 
         $entries = [];
         foreach ($query as $row) {
@@ -255,10 +265,10 @@ class Controller extends BlockController implements UsesFeatureInterface
     /**
      * @param int $newBID
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @return null
      * @throws \Doctrine\DBAL\Exception
      *
-     * @return null
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function duplicate($newBID)
     {
@@ -286,10 +296,10 @@ class Controller extends BlockController implements UsesFeatureInterface
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * @return void
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
-     * @return void
+     * @throws \Doctrine\DBAL\Exception
      */
     public function delete()
     {
@@ -302,10 +312,10 @@ class Controller extends BlockController implements UsesFeatureInterface
     /**
      * @param mixed[] $args
      *
-     * @throws \Doctrine\DBAL\Exception
+     * @return void
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
-     * @return void
+     * @throws \Doctrine\DBAL\Exception
      */
     public function save($args)
     {
@@ -320,9 +330,12 @@ class Controller extends BlockController implements UsesFeatureInterface
             $sortOrder = 0;
             foreach ($entries as $entry) {
                 // Add the entry row
+                if (isset($entry['description'])) {
+                    $entry['description'] = LinkAbstractor::translateTo($entry['description']);
+                }
                 $db->executeStatement(
                     'INSERT INTO btAccordionEntries (bID, sortOrder, title, description) VALUES (?, ?, ?, ?)',
-                    [(int) $this->bID, $sortOrder++, $entry['title'], $entry['description']]
+                    [(int)$this->bID, $sortOrder++, $entry['title'], $entry['description']]
                 );
             }
         }
@@ -333,9 +346,9 @@ class Controller extends BlockController implements UsesFeatureInterface
      *
      * @param array<string,mixed> $args The equivalent to the $_POST submitted
      *
+     * @return array<string,mixed>
      * @throws InvalidArgumentException If the $args or the json are invalid
      *
-     * @return array<string,mixed>
      */
     protected function processJson(array $args): array
     {

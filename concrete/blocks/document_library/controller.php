@@ -26,6 +26,7 @@ use Concrete\Core\Url\UrlImmutable;
 use Concrete\Core\User\User;
 use Doctrine\DBAL\Connection;
 use FileAttributeKey;
+use League\Url\Url;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Controller extends BlockController implements UsesFeatureInterface
@@ -584,7 +585,7 @@ class Controller extends BlockController implements UsesFeatureInterface
             $order = 'asc';
         }
 
-        $url = \URL::to($c);
+        $url = Url::createFromServer($_SERVER);
         if ($query = $url->getQuery()) {
             $query['sort'] = $key;
             $query['dir'] = $order;

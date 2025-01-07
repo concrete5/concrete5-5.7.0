@@ -48,6 +48,8 @@ abstract class PageTestCase extends ConcreteDatabaseTestCase
     ]; // so brutal
 
     protected $metadatas = [
+        'Concrete\Core\Entity\Board',
+        'Concrete\Core\Entity\Board\Instance',
         'Concrete\Core\Entity\Site\Type',
         'Concrete\Core\Entity\Site\Site',
         'Concrete\Core\Entity\Site\Locale',

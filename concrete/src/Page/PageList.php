@@ -88,7 +88,7 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
      */
     protected $includeInactivePages = false;
 
-    public function __construct(StickyRequest $req = null)
+    public function __construct(?StickyRequest $req = null)
     {
         $u = Application::getFacadeApplication()->make(User::class);
         if ($u->isSuperUser()) {
@@ -138,7 +138,7 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
         $this->includeSystemPages = true;
     }
 
-    public function setPermissionsChecker(\Closure $checker = null)
+    public function setPermissionsChecker(?\Closure $checker = null)
     {
         $this->permissionsChecker = $checker;
     }
@@ -691,6 +691,12 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
             $this->query->expr()->in('p.cID', $query->getSQL())
         );
         $this->query->setParameter('containerID', $containerID);
+    }
+
+    public function filterByCacheSettings($value)
+    {
+        $this->query->andWhere('p.cCacheFullPageContent = :cacheSettings');
+        $this->query->setParameter('cacheSettings', $value);
     }
 
 
