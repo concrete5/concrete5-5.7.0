@@ -6,7 +6,7 @@ use Concrete\Core\Page\Command\PageCommand;
 
 class DeletePageVersionRequestsCommand extends PageCommand
 {
-    protected int $versionID;
+    protected $versionID;
 
     public function __construct(int $pageID, int $versionID)
     {
