@@ -3340,7 +3340,8 @@ EOT
             $myCollectionID = $this->getCollectionID();
             foreach ($children as $child) {
                 // Let's avoid recursion caused by potentially malformed data
-                if ($child->getCollectionID() !== $myCollectionID) {
+                // Added second conditional for isAliasPageOrExternalLink to fix https://github.com/concretecms/concretecms/issues/12386
+                if ($child->getCollectionID() !== $myCollectionID && !$child->isAliasPageOrExternalLink()) {
                     $child->rescanCollectionPath();
                 }
             }
