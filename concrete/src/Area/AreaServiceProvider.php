@@ -1,9 +1,10 @@
 <?php
-namespace Concrete\Core\Block;
+
+namespace Concrete\Core\Area;
 
 use Concrete\Core\Foundation\Service\Provider as ServiceProvider;
 
-class BlockServiceProvider extends ServiceProvider
+class AreaServiceProvider extends ServiceProvider
 {
     public function register()
     {

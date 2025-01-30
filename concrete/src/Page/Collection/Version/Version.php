@@ -1,6 +1,7 @@
 <?php
 namespace Concrete\Core\Page\Collection\Version;
 
+use Concrete\Core\Area\CustomStyleRepository as AreaCustomStyleRepository;
 use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Attribute\ObjectTrait;
 use Concrete\Core\Board\Command\RefreshRelevantBoardInstancesCommand;
@@ -553,15 +554,9 @@ class Version extends ConcreteObject implements PermissionObjectInterface, Attri
     {
         if (!isset($this->customAreaStyles)) {
             $app = Facade::getFacadeApplication();
-            $db = $app->make('database')->connection();
-            $r = $db->fetchAll('select issID, arHandle from CollectionVersionAreaStyles where cID = ? and cvID = ?', array(
-                $this->getCollectionID(),
-                $this->cvID,
-            ));
-            $this->customAreaStyles = array();
-            foreach ($r as $styles) {
-                $this->customAreaStyles[$styles['arHandle']] = $styles['issID'];
-            }
+            /** @var AreaCustomStyleRepository $customAreaStyleRepository */
+            $customAreaStyleRepository = $app->make(AreaCustomStyleRepository::class);
+            $this->customAreaStyles = $customAreaStyleRepository->getCollectionVersionAreaStyleIDs($this);
         }
 
         return $this->customAreaStyles;

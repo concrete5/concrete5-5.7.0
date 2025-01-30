@@ -137,6 +137,8 @@ return [
         'core_summary' => '\Concrete\Core\Summary\ServiceProvider',
         'core_boards' => '\Concrete\Core\Board\ServiceProvider',
         'core_page' => \Concrete\Core\Page\PageServiceProvider::class,
+        'core_block' => \Concrete\Core\Block\BlockServiceProvider::class,
+        'core_area' => \Concrete\Core\Area\AreaServiceProvider::class,
 
         // Authentication
         'core_oauth' => '\Concrete\Core\Authentication\Type\OAuth\ServiceProvider',
