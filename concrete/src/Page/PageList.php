@@ -188,7 +188,6 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
 
     public function finalizeQuery(\Doctrine\DBAL\Query\QueryBuilder $query)
     {
-        $expr = $query->expr();
         if ($this->includeAliases) {
             $query->from('Pages', 'p')
                 ->leftJoin('p', 'Pages', 'pa', 'p.cPointerID = pa.cID')
@@ -262,13 +261,13 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
             } else {
                 switch ($this->siteTree) {
                     case self::SITE_TREE_CURRENT:
-                        $c = \Page::getCurrentPage();
+                        $c = Page::getCurrentPage();
                         $tree = false;
                         if (is_object($c) && !$c->isError()) {
                             $tree = $c->getSiteTreeObject();
                         }
                         if (!is_object($tree)) {
-                            $site = \Core::make('site')->getSite();
+                            $site = $app->make('site')->getSite();
                             $tree = $site->getSiteTreeObject();
                         }
                         break;
