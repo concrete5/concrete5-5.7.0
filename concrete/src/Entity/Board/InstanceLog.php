@@ -19,7 +19,7 @@ class InstanceLog implements \JsonSerializable
     protected $id;
 
     /**
-     * @ORM\OnetoOne(targetEntity="Instance", inversedBy="log")
+     * @ORM\OneToOne(targetEntity="Instance", inversedBy="log")
      * @ORM\JoinColumn(name="boardInstanceID", referencedColumnName="boardInstanceID")
      */
     protected $instance;
