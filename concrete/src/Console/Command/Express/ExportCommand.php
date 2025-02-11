@@ -27,7 +27,7 @@ class ExportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'c5:express:export {entity : Which entity to export entries from}';
+    protected $signature = 'concrete:express:entry:export {entity : Which entity to export entries from}';
 
     /**
      * Handle processing calls to this command
@@ -63,6 +63,18 @@ class ExportCommand extends Command
         return $this->outputFormatCsv($entity, $app, $config, $factory);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Symfony\Component\Console\Command\Command::configure()
+     */
+    protected function configure()
+    {
+        $this->setAliases([
+            'c5:express:export',
+        ]);
+    }
+    
     /**
      * Output the entries as CSV
      *

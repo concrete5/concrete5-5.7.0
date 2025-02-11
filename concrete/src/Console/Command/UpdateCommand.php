@@ -20,7 +20,10 @@ class UpdateCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:update')
+            ->setName('concrete:update')
+            ->setAliases([
+                'c5:update',
+            ])
             ->setDescription('Runs all database migrations to bring the Concrete installation up to date.')
             ->addEnvOption()
             ->setCanRunAsRoot(false)

@@ -21,8 +21,9 @@ class TranslatePackageCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:package:translate')
+            ->setName('concrete:package:translate')
             ->setAliases([
+                'c5:package:translate',
                 'c5:package-translate',
                 'c5:translate-package',
             ])

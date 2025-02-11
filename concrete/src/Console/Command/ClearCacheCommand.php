@@ -17,7 +17,10 @@ class ClearCacheCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:clear-cache')
+            ->setName('concrete:cache:clear')
+            ->setAliases([
+                'c5:clear-cache',
+            ])
             ->setDescription('Clear the cache')
             ->addOption('thumbnails', 't', InputOption::VALUE_REQUIRED, "Should the thumbnails be removed from the cache? [Y/N]")
             ->addEnvOption()

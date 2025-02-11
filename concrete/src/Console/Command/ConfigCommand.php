@@ -15,7 +15,7 @@ class ConfigCommand extends Command
 {
     protected $description = 'Set or get configuration parameters.';
 
-    protected $signature = 'c5:config 
+    protected $signature = 'concrete:config 
         {action : Either "get" or "set"} 
         {item : The config item EG: "concrete.debug.detail"} 
         {value? : The value to set}
@@ -45,6 +45,9 @@ class ConfigCommand extends Command
     protected function configure()
     {
         $this
+            ->setAliases([
+                'c5:config',
+            ])
             ->addEnvOption()
             ->setHelp(
                 <<<'EOT'

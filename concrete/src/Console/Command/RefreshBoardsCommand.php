@@ -19,7 +19,10 @@ class RefreshBoardsCommand extends Command
         $errExitCode = static::FAILURE;
 
         $this
-            ->setName('c5:boards:refresh')
+            ->setName('concrete:board:refresh')
+            ->setAliases([
+                'c5:boards:refresh',
+            ])
             ->setDescription('Add content to boards and board instances.')
             ->addOption('--all',  'a',InputOption::VALUE_NONE,
     'Refreshes and regenerates boards.')

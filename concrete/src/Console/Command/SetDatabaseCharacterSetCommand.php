@@ -17,7 +17,7 @@ class SetDatabaseCharacterSetCommand extends Command
     protected $description = 'Set the character set and collation of a database connection.';
 
     protected $signature = <<<'EOT'
-c5:database:charset:set
+concrete:database:charset:set
     {charset : the character set or the collation to be used for the connection}
     {connection? : the name of the connection - if not specified we'll use the default one}
     {--f|force : re-apply the character set/collation even if they should already be in use}
@@ -70,5 +70,19 @@ EOT
         );
 
         return static::SUCCESS;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Symfony\Component\Console\Command\Command::configure()
+     */
+    protected function configure()
+    {
+        $this
+            ->setAliases([
+                'c5:database:charset:set',
+            ])
+        ;
     }
 }

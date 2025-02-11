@@ -14,7 +14,10 @@ class InfoCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:info')
+            ->setName('concrete:info')
+            ->setAliases([
+                'c5:info',
+            ])
             ->setDescription('Get detailed information about this installation.')
             ->addEnvOption()
             ->setHelp(<<<EOT

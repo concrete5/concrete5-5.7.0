@@ -22,7 +22,7 @@ class PhpCodingStyleCommand extends Command
     {
         $defaultWebRoot = PhpFixerOptions::getDefaultWebRoot();
         $this->signature = <<<EOT
-c5:phpcs
+concrete:dev:phpcs:fix
 {--no-cache : Specify this flag to turn off the coding style cache}
 {--webroot={$defaultWebRoot} : Specify the webroot (use - to auto-detect it)}
 {--p|php= : The minimum PHP version }
@@ -89,7 +89,11 @@ EOT
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
 
-        $this->setHelp(<<<EOT
+        $this
+            ->setAliases([
+                'c5:phpcs',
+            ])
+            ->setHelp(<<<EOT
 Check or fix the PHP coding style.
 
 Return values when checking the coding style:
@@ -100,7 +104,8 @@ Return values when applying the coding style:
 - {$okExitCode}: no error occurred
 - {$errExitCode}: some error occurred
 EOT
-        );
+            )
+        ;
     }
 
     /**

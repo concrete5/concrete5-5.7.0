@@ -27,7 +27,10 @@ class RescanFilesCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('c5:rescan-files')
+            ->setName('concrete:file:scan')
+            ->setAliases([
+                'c5:rescan-files',
+            ])
             ->setDescription('Rescans all files in the file manager.')
             ->addOption('after',  'a',InputOption::VALUE_REQUIRED, 'Rescan files after a particular file ID.')
             ->addOption('limit',  'l',InputOption::VALUE_REQUIRED, 'Limit the number of files to scan in this batch');

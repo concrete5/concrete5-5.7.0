@@ -34,9 +34,14 @@ class TaskCommand extends SymfonyCommand
     public function configure()
     {
         $controller = $this->task->getController();
-        $this->setName(sprintf('task:%s', $controller->getConsoleCommandName()));
-        $this->setDescription($controller->getDescription());
-
+        $nameSuffix = $controller->getConsoleCommandName();
+        $this
+            ->setName("concrete:task:{$nameSuffix}")
+            ->setAliases([
+                "task:{$nameSuffix}",
+            ])
+            ->setDescription($controller->getDescription())
+        ;
         $definition = $controller->getInputDefinition();
         if ($definition) {
             $definition->addToCommand($this);

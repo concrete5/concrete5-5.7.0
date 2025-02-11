@@ -14,11 +14,16 @@ class InstallThemeCommand extends Command
 {
     protected function configure()
     {
-        $this->setName('c5:theme:install')
-        ->addOption('activate', 'a', InputOption::VALUE_NONE, 'Activate this theme after install', null)
-        ->setDescription('Install a Concrete Theme')
-        ->setCanRunAsRoot(false)
-        ->addArgument('theme-handle', null, InputOption::VALUE_REQUIRED, 'The handle name of the theme');
+        $this
+            ->setName('concrete:theme:install')
+            ->setAliases([
+                'c5:theme:install',
+            ])
+            ->addOption('activate', 'a', InputOption::VALUE_NONE, 'Activate this theme after install', null)
+            ->setDescription('Install a Concrete Theme')
+            ->setCanRunAsRoot(false)
+            ->addArgument('theme-handle', null, InputOption::VALUE_REQUIRED, 'The handle name of the theme')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

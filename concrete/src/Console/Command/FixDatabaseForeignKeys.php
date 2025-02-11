@@ -16,7 +16,7 @@ class FixDatabaseForeignKeys extends Command
     protected $description = 'Fix the foreign keys.';
 
     protected $signature = <<<'EOT'
-c5:database:foreignkey:fix
+concrete:database:foreignkey:fix
     {table? : the name of the database table to be fixed - if not specified we'll fix all the tables in the database}
 EOT
     ;
@@ -39,5 +39,19 @@ EOT
         $foreignKeyFixer->fixForeignKeys($tableNames, $errors);
 
         return $errors->count() === 0 ? static::SUCCESS : static::FAILURE;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see \Symfony\Component\Console\Command\Command::configure()
+     */
+    protected function configure()
+    {
+        $this
+            ->setAliases([
+                'c5:database:foreignkey:fix',
+            ])
+        ;
     }
 }

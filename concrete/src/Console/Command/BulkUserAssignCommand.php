@@ -21,7 +21,10 @@ class BulkUserAssignCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('c5:user-group:bulk-assign-users')
+            ->setName('concrete:user:group:assign:bulk')
+            ->setAliases([
+                'c5:user-group:bulk-assign-users',
+            ])
             ->setDescription('Bulk assign users to groups by a given CSV file.')
             ->addOption('csv-file', 'c', InputOption::VALUE_REQUIRED, 'Path to CSV file.')
             ->addOption('group-id', 'g', InputOption::VALUE_REQUIRED, 'The id of the target group.')

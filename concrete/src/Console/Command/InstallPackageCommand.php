@@ -25,8 +25,9 @@ class InstallPackageCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:package:install')
+            ->setName('concrete:package:install')
             ->setAliases([
+                'c5:package:install',
                 'c5:package-install',
                 'c5:install-package',
             ])

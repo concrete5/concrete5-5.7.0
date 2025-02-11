@@ -16,7 +16,11 @@ class ActivateThemeSkinCommand extends Command
 {
     protected function configure()
     {
-        $this->setName('concrete:theme:activate-skin')
+        $this
+            ->setName('concrete:theme:skin:activate')
+            ->setAliases([
+                'concrete:theme:activate-skin',
+            ])
             ->addOption(
                 'site',
                 's',

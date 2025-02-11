@@ -19,7 +19,10 @@ class RefreshEntitiesCommand extends Command
         $errExitCode = static::FAILURE;
 
         $this
-            ->setName('c5:entities:refresh')
+            ->setName('concrete:database:entity:refresh')
+            ->setAliases([
+                'c5:entities:refresh',
+            ])
             ->setDescription('Refresh the Doctrine database entities')
             ->addEnvOption()
             ->setCanRunAsRoot(false)

@@ -13,7 +13,10 @@ class ExecCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('c5:exec')
+            ->setName('concrete:exec')
+            ->setAliases([
+                'c5:exec',
+            ])
             ->setDescription('Execute a PHP script within the Concrete environment')
             ->addEnvOption()
             ->addArgument('script', InputArgument::REQUIRED, 'The path of the script to be executed')

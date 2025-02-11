@@ -16,7 +16,10 @@ class GenerateFileIdentifiersCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('c5:files:generate-identifiers')
+            ->setName('concrete:file:identifier:generate')
+            ->setAliases([
+                'c5:files:generate-identifiers',
+            ])
             ->setDescription('Create unique identifiers for existing files.')
             ->addOption('reset', 'a', InputOption::VALUE_NONE,
                 "Reset all generated unique identifiers.")

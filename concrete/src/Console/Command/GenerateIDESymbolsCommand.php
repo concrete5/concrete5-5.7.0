@@ -17,7 +17,10 @@ class GenerateIDESymbolsCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:ide-symbols')
+            ->setName('concrete:dev:symbols:generate')
+            ->setAliases([
+                'c5:ide-symbols',
+            ])
             ->setDescription('Generate IDE symbols')
             ->addEnvOption()
             ->setCanRunAsRoot(false)

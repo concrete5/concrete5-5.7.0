@@ -56,7 +56,10 @@ More info at https://documentation.concretecms.org/9-x/developers/security/cli-j
 EOT
         ;
         $this
-            ->setName('c5:service')
+            ->setName('concrete:service')
+            ->setAliases([
+                'c5:service',
+            ])
             ->setDescription('Check or update the web server configuration')
             ->addEnvOption()
             ->addOption('service-version', 'r', InputOption::VALUE_REQUIRED, 'The specific version of the web server software', '')

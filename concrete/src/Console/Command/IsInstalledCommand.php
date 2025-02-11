@@ -21,7 +21,10 @@ class IsInstalledCommand extends Command
         $errExitCode = static::FAILURE;
 
         $this
-            ->setName('c5:is-installed')
+            ->setName('concrete:check:installed')
+            ->setAliases([
+                'c5:is-installed',
+            ])
             ->setDescription('Check if Concrete is already installed')
             ->addEnvOption()
             ->setHelp(<<<EOT

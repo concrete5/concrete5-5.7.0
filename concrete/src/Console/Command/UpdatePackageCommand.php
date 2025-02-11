@@ -17,8 +17,9 @@ class UpdatePackageCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:package:update')
+            ->setName('concrete:package:update')
             ->setAliases([
+                'c5:package:update',
                 'c5:package-update',
                 'c5:update-package',
             ])

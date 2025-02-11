@@ -157,8 +157,9 @@ final class PackPackageCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:package:pack')
+            ->setName('concrete:package:pack')
             ->setAliases([
+                'c5:package:pack',
                 'c5:package-pack',
                 'c5:pack-package',
             ])

@@ -18,8 +18,9 @@ class UninstallPackageCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:package:uninstall')
+            ->setName('concrete:package:uninstall')
             ->setAliases([
+                'c5:package:uninstall',
                 'c5:package-uninstall',
                 'c5:uninstall-package',
             ])

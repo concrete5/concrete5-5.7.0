@@ -20,7 +20,10 @@ class GenerateSitemapCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:sitemap:generate')
+            ->setName('concrete:sitemap:generate')
+            ->setAliases([
+                'c5:sitemap:generate',
+            ])
             ->setDescription('Generate the sitemap in XML format.')
             ->addEnvOption()
             ->setCanRunAsRoot(false)

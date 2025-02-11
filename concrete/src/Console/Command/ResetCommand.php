@@ -17,7 +17,10 @@ class ResetCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:reset')
+            ->setName('concrete:reset')
+            ->setAliases([
+                'c5:reset',
+            ])
             ->setDescription('Reset the Concrete installation, deleting files and emptying the database')
             ->addEnvOption()
             ->setCanRunAsRoot(false)

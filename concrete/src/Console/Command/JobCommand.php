@@ -19,7 +19,10 @@ class JobCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:job')
+            ->setName('concrete:job:run')
+            ->setAliases([
+                'c5:job',
+            ])
             ->setDescription(t('Run a Concrete job'))
             ->addEnvOption()
             ->addOption('set', null, InputOption::VALUE_NONE, t('Find jobs by set instead of job handle'))

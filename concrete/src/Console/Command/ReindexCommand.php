@@ -25,7 +25,10 @@ class ReindexCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('c5:reindex')
+            ->setName('concrete:index:generate')
+            ->setAliases([
+                'c5:reindex',
+            ])
             ->setDescription('Reindex pages, files, users and express entities')
             ->addOption('pages', 'p', InputOption::VALUE_NONE, 'Include pages in the reindex')
             ->addOption('express', 'e', InputOption::VALUE_NONE, 'Include express in the reindex')

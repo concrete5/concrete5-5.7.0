@@ -59,7 +59,10 @@ class InstallCommand extends Command
         $okExitCode = static::SUCCESS;
         $errExitCode = static::FAILURE;
         $this
-            ->setName('c5:install')
+            ->setName('concrete:install')
+            ->setAliases([
+                'c5:install',
+            ])
             ->setDescription('Install Concrete')
             ->addEnvOption()
             ->setCanRunAsRoot(false)

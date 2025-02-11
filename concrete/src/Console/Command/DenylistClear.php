@@ -38,7 +38,10 @@ class DenylistClear extends Command
         $automaticBansAll = static::DELETE_AUTOMATIC_BANS_ALL;
         $automaticBansExpired = static::DELETE_AUTOMATIC_BANS_EXPIRED;
         $this
-            ->setName('c5:denylist:clear')
+            ->setName('concrete:ip:denylist:clear')
+            ->setAliases([
+                'c5:denylist:clear',
+            ])
             ->setDescription('Clear denylist-related data')
             ->addArgument('handle', InputArgument::IS_ARRAY, 'List of IP Access Control Category handles (if not specified: apply to all the categories)')
             ->addEnvOption()
