@@ -188,7 +188,6 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
 
     public function finalizeQuery(\Doctrine\DBAL\Query\QueryBuilder $query)
     {
-        $expr = $query->expr();
         if ($this->includeAliases) {
             $query->from('Pages', 'p')
                 ->leftJoin('p', 'Pages', 'pa', 'p.cPointerID = pa.cID')
@@ -209,24 +208,41 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
                 ->andWhere('p.cIsTemplate = 0');
         }
 
+        $app = Application::getFacadeApplication();
         switch ($this->pageVersionToRetrieve) {
             case self::PAGE_VERSION_RECENT:
-                $query->andWhere('cv.cvID = (select max(cvID) from CollectionVersions where cID = cv.cID)');
+                $query->innerJoin(
+                    'p',
+                    '(select cID, max(cvID) as max_cvID from CollectionVersions group by cID)',
+                    'cv_max',
+                    'cv_max.cID = p.cID and cv_max.max_cvID = cv.cvID'
+                );
                 break;
             case self::PAGE_VERSION_RECENT_UNAPPROVED:
-                $query
-                    ->andWhere('cv.cvID = (select max(cvID) from CollectionVersions where cID = cv.cID)')
-                    ->andWhere($expr->eq('cvIsApproved', 0));
+                $query->innerJoin(
+                    'p',
+                    '(select cID, max(cvID) as max_cvID from CollectionVersions where cvIsApproved = 0 group by cID)',
+                    'cv_max',
+                    'cv_max.cID = p.cID and cv_max.max_cvID = cv.cvID'
+                );
                 break;
             case self::PAGE_VERSION_SCHEDULED:
-                $now = new \DateTime();
-                $query->andWhere('cv.cvID = (select cvID from CollectionVersions where cID = cv.cID and cvIsApproved = 1 and ((cvPublishDate > :cvPublishDate) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)) order by cvPublishDate desc limit 1)');
-                $query->setParameter('cvPublishDate', $now->format('Y-m-d H:i:s'));
+                $query->innerJoin(
+                    'p',
+                    '(select cID, max(cvPublishDate) as max_cvPublishDate from CollectionVersions where cvIsApproved = 1 and ((cvPublishDate > :cvPublishDate) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)) group by cID)',
+                    'cv_max',
+                    'cv_max.cID = p.cID and cv_max.max_cvPublishDate = cv.cvPublishDate'
+                );
+                $query->setParameter('cvPublishDate', $app->make('date')->getOverridableNow());
                 break;
             case self::PAGE_VERSION_ACTIVE:
             default:
-                $app = Application::getFacadeApplication();
-                $query->andWhere('cv.cvID = (select max(cvID) from CollectionVersions where cID = cv.cID and cvIsApproved = 1 and ((cvPublishDate <= :cvPublishDate or cvPublishDate is null) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)))');
+                $query->innerJoin(
+                  'p',
+                  '(select cID, max(cvID) as max_cvID from CollectionVersions where cvIsApproved = 1 and ((cvPublishDate <= :cvPublishDate or cvPublishDate is null) and (cvPublishEndDate >= :cvPublishDate or cvPublishEndDate is null)) group by cID)',
+                  'cv_max',
+                  'cv_max.cID = p.cID and cv_max.max_cvID = cv.cvID'
+                );
                 $query->setParameter('cvPublishDate', $app->make('date')->getOverridableNow());
                 break;
         }
@@ -245,13 +261,13 @@ class PageList extends DatabaseItemList implements PagerProviderInterface, Pagin
             } else {
                 switch ($this->siteTree) {
                     case self::SITE_TREE_CURRENT:
-                        $c = \Page::getCurrentPage();
+                        $c = Page::getCurrentPage();
                         $tree = false;
                         if (is_object($c) && !$c->isError()) {
                             $tree = $c->getSiteTreeObject();
                         }
                         if (!is_object($tree)) {
-                            $site = \Core::make('site')->getSite();
+                            $site = $app->make('site')->getSite();
                             $tree = $site->getSiteTreeObject();
                         }
                         break;
