@@ -698,7 +698,8 @@ class Controller extends BlockController implements NotificationProviderInterfac
                 }
                 $notifier = $controller->getNotifier($this);
                 $notifications = $notifier->getNotificationList();
-                array_walk($notifications->getNotifications(), function ($notification) use ($submittedAttributeValues) {
+                $notificationList = $notifications->getNotifications();
+                array_walk($notificationList, function ($notification) use ($submittedAttributeValues) {
                     if (method_exists($notification, "setAttributeValues")) {
                         $notification->setAttributeValues($submittedAttributeValues);
                     }

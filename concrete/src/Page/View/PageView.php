@@ -28,6 +28,7 @@ class PageView extends View
     protected $cp;
     protected $pTemplateID;
     protected $customPreviewRequest;
+    protected $pTemplatePkgHandle;
 
     public function getScopeItems()
     {
