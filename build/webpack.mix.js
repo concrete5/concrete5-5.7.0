@@ -410,6 +410,34 @@ mix
             ]
         }
     })
+    .sass('../concrete/themes/atomik/css/presets/coastal-breeze/main.scss', 'themes/atomik/css/skins/coastal-breeze.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/golden-meadow/main.scss', 'themes/atomik/css/skins/golden-meadow.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/misty-sage/main.scss', 'themes/atomik/css/skins/misty-sage.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
+    .sass('../concrete/themes/atomik/css/presets/amber-twilight/main.scss', 'themes/atomik/css/skins/amber-twilight.css', {
+        sassOptions: {
+            includePaths: [
+                path.resolve(__dirname, './node_modules/')
+            ]
+        }
+    })
     .js('assets/themes/atomik/js/main.js', 'themes/atomik').vue()
 
 
